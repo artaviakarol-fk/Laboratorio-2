@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<title>Buscador y Comparador de Equipos · Mundial 2026</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="ball-track" aria-hidden="true"><span class="ball">⚽</span></div>
+    <h1>Mundial 2026 <span>Buscador &amp; Comparador</span></h1>
+    <p class="subtitle">Escriba el nombre de una selección para ver sugerencias en vivo.</p>
+  </header>
+
+  <main class="app-main">
+
+    <!-- ===================== BUSCADOR ===================== -->
+    <section class="search-section" aria-label="Buscador de equipos">
+      <div class="search-box">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Ej: Argentina, Brasil, España..."
+          autocomplete="off"
+          aria-label="Buscar selección"
+        >
+        <!-- El <ul> se llena 100% por JavaScript. No hay <li> fijos en el HTML. -->
+        <ul id="dropdown" class="dropdown hidden" role="listbox"></ul>
+      </div>
+
+      <!-- Chips de los equipos ya seleccionados para comparar (máx. 2) -->
+      <div id="selected-bar" class="selected-bar"></div>
+      <button id="compare-btn" type="button" class="compare-btn hidden" disabled>Comparar equipos</button>
+    </section>
+
+    <!-- ===================== COMPARACIÓN ===================== -->
+    <section class="compare-section" aria-label="Comparación de equipos">
+      <div id="empty-state" class="empty-state">
+        Seleccione dos equipos desde el buscador para compararlos aquí.
+      </div>
+
+      <div id="compare-loading" class="compare-loading hidden">
+        Cargando comparación...
+      </div>
+
+      <div id="compare-error" class="compare-error hidden"></div>
+
+      <!-- Las dos columnas se generan dinámicamente en JS -->
+      <div id="compare-columns" class="compare-columns hidden"></div>
+    </section>
+
+  </main>
+
+  <!-- ===================== MODAL DE RE-AUTENTICACIÓN (401) ===================== -->
+  <!-- Se muestra encima de todo sin destruir ni recargar el resto de la página -->
+  <div id="reauth-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="reauth-title">
+    <div class="modal-box">
+      <h2 id="reauth-title">Sesión expirada</h2>
+      <p>Su token dejó de ser válido. Vuelva a autenticarse para continuar; lo que tenía escrito y comparado seguirá aquí.</p>
+
+      <form id="login-form" class="login-form">
+        <label for="login-user">Correo electrónico</label>
+        <input type="email" id="login-user" name="email" required autocomplete="username">
+
+        <label for="login-pass">Contraseña</label>
+        <input type="password" id="login-pass" name="pass" required autocomplete="current-password">
+
+        <button type="submit" id="login-submit">Iniciar sesión</button>
+        <p id="login-error" class="login-error hidden"></p>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
