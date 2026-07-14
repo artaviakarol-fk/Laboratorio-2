@@ -1,0 +1,99 @@
+/* ===================================================================
+   base.css
+   Variables de color globales, reset básico, y el encabezado
+   (título, subtítulo, balón animado).
+=================================================================== */
+
+:root {
+  --bg: #0f1b2d;
+  --bg-panel: #16273f;
+  --accent: #2fbf71;
+  --accent-dark: #1f9c5a;
+  --danger: #e2544b;
+  --text: #eef3f8;
+  --text-dim: #9fb0c3;
+  --border: #24374f;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  color: var(--text);
+  min-height: 100vh;
+  background-image:
+    linear-gradient(rgba(15, 27, 45, 0.88), rgba(15, 27, 45, 0.93)),
+    url('https://www.eluniversal.com.mx/resizer/v2/FYOUVAUSLBEWHCX5OOIWLLMAOU.jpg?auth=402e654d13e90db84470394cd15b62fa9d4b82fd7b30fb7797127fc37b39c82b&smart=true&height=666');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+.app-header {
+  padding: 2rem 1.5rem 1rem;
+  text-align: center;
+}
+
+.ball-track {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  height: 2.2rem;
+  margin: 0 auto 0.25rem;
+  overflow: hidden;
+}
+
+.ball {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 1.8rem;
+  line-height: 1;
+  animation: rollAcross 3.2s ease-in-out infinite alternate;
+}
+
+@keyframes rollAcross {
+  from { left: 0; transform: rotate(0deg); }
+  to   { left: calc(100% - 1.8rem); transform: rotate(360deg); }
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.app-header h1 span {
+  display: block;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--accent);
+  margin-top: 0.25rem;
+}
+
+.subtitle {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.app-main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.5rem 4.5rem;
+}
+
+.hidden { display: none !important; }
+
+.app-footer {
+  text-align: center;
+  padding: 1.5rem 1.5rem 5rem;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.app-footer a {
+  color: var(--accent);
+}

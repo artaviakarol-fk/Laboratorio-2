@@ -1,0 +1,105 @@
+/* ===================================================================
+   modal.css
+   El modal de re-autenticación (401), el formulario de login, y el
+   panel fijo de sesión con los botones de demo (401 / 404).
+=================================================================== */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,10,18,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.modal-box {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.75rem;
+  max-width: 400px;
+  width: 100%;
+}
+
+.modal-box h2 { margin-top: 0; color: var(--danger); }
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 1rem;
+}
+
+.login-form label { font-size: 0.85rem; color: var(--text-dim); }
+
+.login-form input {
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.login-form button {
+  background: var(--accent);
+  border: none;
+  color: #06210f;
+  font-weight: 700;
+  padding: 0.65rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.login-form button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(47, 191, 113, 0.35);
+}
+
+.login-form button:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.login-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+/* ---------- Panel de sesión ---------- */
+.session-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #060c15;
+  border-top: 1px solid var(--border);
+  padding: 0.6rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+  z-index: 50;
+  flex-wrap: wrap;
+}
+
+.session-status { color: var(--text-dim); }
+
+.session-panel button {
+  background: var(--danger);
+  border: none;
+  color: white;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.session-panel button:hover { transform: translateY(-1px); }
+
+.demo-404-btn {
+  background: #3b82c4 !important;
+}

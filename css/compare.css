@@ -1,0 +1,111 @@
+/* ===================================================================
+   compare.css
+   La sección de comparación: estado vacío/cargando/error, las dos
+   columnas de equipos, y las cajitas de posición/último-próximo
+   partido dentro de cada columna.
+=================================================================== */
+
+.compare-section { min-height: 200px; }
+
+.empty-state, .compare-loading {
+  text-align: center;
+  color: var(--text-dim);
+  padding: 3rem 1rem;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+}
+
+.compare-error {
+  text-align: center;
+  color: var(--danger);
+  padding: 1.5rem;
+  border: 1px solid var(--danger);
+  border-radius: 12px;
+  background: rgba(226,84,75,0.08);
+}
+
+.retry-btn {
+  margin-top: 0.75rem;
+  background: var(--danger);
+  border: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.retry-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(226, 84, 75, 0.35);
+}
+
+.retry-btn:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.compare-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .compare-columns { grid-template-columns: 1fr; }
+}
+
+.team-column {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.25rem;
+  animation: fadeInUp 0.4s ease both;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.team-column:nth-child(2) { animation-delay: 0.08s; }
+
+.team-column:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+}
+
+.team-column h3 {
+  margin-top: 0;
+  color: var(--accent);
+}
+
+.team-flag {
+  width: 100%;
+  max-width: 160px;
+  height: auto;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.standing-box, .match-box {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+
+.standing-box strong, .match-box strong {
+  color: var(--accent);
+}
+
+.team-column dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.4rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.team-column dt { color: var(--text-dim); }
+.team-column dd { margin: 0; }

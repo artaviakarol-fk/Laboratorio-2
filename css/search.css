@@ -1,0 +1,133 @@
+/* ===================================================================
+   search.css
+   El buscador: input, dropdown de sugerencias, chips de equipos
+   seleccionados, y el botón de "Comparar equipos".
+=================================================================== */
+
+.search-section { position: relative; margin-bottom: 2rem; }
+
+.search-box { position: relative; }
+
+#search-input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  color: var(--text);
+  outline: none;
+}
+
+#search-input:focus { border-color: var(--accent); }
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem;
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 20;
+}
+
+.dropdown.hidden { display: none; }
+
+.dropdown li {
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dropdown li:hover,
+.dropdown li.disabled { background: rgba(255,255,255,0.05); }
+
+.dropdown li.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dropdown .dropdown-message {
+  padding: 0.75rem;
+  color: var(--text-dim);
+  cursor: default;
+}
+
+.dropdown .dropdown-message.error { color: var(--danger); }
+
+.selected-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.compare-btn {
+  display: block;
+  margin-top: 0.9rem;
+  background: var(--accent);
+  border: none;
+  color: #06210f;
+  font-weight: 700;
+  padding: 0.7rem 1.2rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.compare-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(47, 191, 113, 0.35);
+}
+
+.compare-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+  box-shadow: none;
+}
+
+.compare-btn:disabled {
+  background: var(--border);
+  color: var(--text-dim);
+  cursor: not-allowed;
+}
+
+.compare-btn.hidden { display: none; }
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--accent-dark);
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  animation: popIn 0.25s ease;
+  transition: transform 0.15s ease;
+}
+
+.chip:hover { transform: translateY(-1px); }
+
+.chip button {
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 700;
+  line-height: 1;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.chip button:hover {
+  transform: scale(1.25) rotate(90deg);
+  color: var(--danger);
+}
