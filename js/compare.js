@@ -174,7 +174,7 @@ function resolveStadiumName(game, stadiums) {
   if (!stadiumId || !Array.isArray(stadiums)) return null;
 
   const match = stadiums.find((s) => String(s.id) === String(stadiumId));
-  return match ? (match.name || match.stadium_name || null) : null;
+  return match ? (match.name_en || match.name || match.stadium_name || null) : null;
 }
 
 function buildMatchInfo(target, teamId, stadiums, isUpcoming) {
@@ -200,7 +200,7 @@ function findTeamMatches(teamId, games, stadiums) {
     .filter((g) => String(g.home_team_id) === String(teamId) || String(g.away_team_id) === String(teamId))
     .sort((a, b) => Number(a.matchday) - Number(b.matchday));
 
-  if (!teamGames.length) return { __lastMatch: null, __nextMatch: null, __goalsScored: null };
+  if (!teamGames.length) return { __lastMatch: null, __nextMatch: null, __goalsScored: null, __matchesPlayed: null };
 
   const played = teamGames.filter((g) => !(g.finished === 'FALSE' || g.finished === false));
   const upcoming = teamGames.find((g) => g.finished === 'FALSE' || g.finished === false);
@@ -217,6 +217,7 @@ function findTeamMatches(teamId, games, stadiums) {
     __lastMatch: lastPlayed ? buildMatchInfo(lastPlayed, teamId, stadiums, false) : null,
     __nextMatch: upcoming ? buildMatchInfo(upcoming, teamId, stadiums, true) : null,
     __goalsScored: played.length ? goalsScored : null,
+    __matchesPlayed: played.length,
   };
 }
 
@@ -278,7 +279,7 @@ function renderComparison(teamA, teamB) {
 const HIDDEN_FIELDS = new Set([
   '_id', '__v', 'id', 'name_en', 'groups', 'flag',
   'name_fa', 'fifa_code', 'iso2',
-  '__standing', '__nextMatch', '__lastMatch', '__goalsScored',
+  '__standing', '__nextMatch', '__lastMatch', '__goalsScored', '__matchesPlayed',
 ]);
 
 function buildTeamColumn(team) {
@@ -307,7 +308,11 @@ function buildTeamColumn(team) {
   title.textContent = team.name_en || team.name || 'Equipo';
   col.appendChild(title);
 
-  // ---- Posición en el grupo + goles anotados ----
+  const matchesLabel = (team.__matchesPlayed !== null && team.__matchesPlayed !== undefined)
+    ? `🏃 ${team.__matchesPlayed} partido${team.__matchesPlayed === 1 ? '' : 's'} jugado${team.__matchesPlayed === 1 ? '' : 's'} en el mundial`
+    : '';
+
+  // ---- Posición en el grupo + goles anotados + partidos jugados ----
   if (team.__standing) {
     const s = team.__standing;
     const standingBox = document.createElement('div');
@@ -315,6 +320,7 @@ function buildTeamColumn(team) {
     standingBox.innerHTML = `
       <strong>Grupo ${s.group}</strong> · ${s.position}° de ${s.total} · ${s.pts} pts<br>
       ⚽ ${s.gf} goles anotados · ${s.ga} recibidos
+      ${matchesLabel ? `<br>${matchesLabel}` : ''}
     `;
     col.appendChild(standingBox);
   } else if (team.groups) {
@@ -325,6 +331,11 @@ function buildTeamColumn(team) {
       text += ` · ⚽ ${team.__goalsScored} goles anotados`;
     }
     standingBox.textContent = text;
+    if (matchesLabel) {
+      const matchesLine = document.createElement('div');
+      matchesLine.textContent = matchesLabel;
+      standingBox.appendChild(matchesLine);
+    }
     col.appendChild(standingBox);
   }
 
