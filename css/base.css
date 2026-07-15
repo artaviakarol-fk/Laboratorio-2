@@ -1,8 +1,3 @@
-/* ===================================================================
-   base.css
-   Variables de color globales, reset básico, y el encabezado
-   (título, subtítulo, balón animado).
-=================================================================== */
 
 :root {
   --bg: #0f1b2d;
@@ -81,14 +76,14 @@ body {
 .app-main {
   max-width: 900px;
   margin: 0 auto;
-  padding: 0 1.5rem 4.5rem;
+  padding: 0 1.5rem 2rem;
 }
 
 .hidden { display: none !important; }
 
 .app-footer {
   text-align: center;
-  padding: 1.5rem 1.5rem 5rem;
+  padding: 1.5rem 1.5rem 2.5rem;
   color: var(--text-dim);
   font-size: 0.8rem;
   line-height: 1.6;

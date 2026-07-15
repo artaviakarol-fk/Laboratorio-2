@@ -14,8 +14,6 @@
 </head>
 <body>
 
-  <a href="#search-input" class="skip-link">Saltar al buscador</a>
-
   <div class="a11y-toolbar" role="toolbar" aria-label="Opciones de accesibilidad">
     <span class="a11y-label">Accesibilidad:</span>
     <button type="button" id="font-decrease-btn" aria-label="Reducir tamaño de letra">A−</button>
@@ -42,14 +40,14 @@
           autocomplete="off"
           aria-label="Buscar selección"
         >
-        <!-- El <ul> se llena 100% por JavaScript. No hay <li> fijos en el HTML. -->
+        
         <ul id="dropdown" class="dropdown hidden" role="listbox" aria-label="Sugerencias de equipos"></ul>
       </div>
 
-      <!-- Región invisible que anuncia resultados de búsqueda a lectores de pantalla -->
+      
       <p id="sr-search-status" class="visually-hidden" role="status" aria-live="polite"></p>
 
-      <!-- Chips de los equipos ya seleccionados para comparar (máx. 2) -->
+     
       <div id="selected-bar" class="selected-bar" aria-live="polite"></div>
       <button id="compare-btn" type="button" class="compare-btn hidden" disabled>Comparar equipos</button>
     </section>
@@ -61,7 +59,7 @@
       </div>
 
       <div id="compare-loading" class="compare-loading hidden" role="status" aria-live="polite">
-        Cargando comparación...
+        
       </div>
 
       <div id="compare-error" class="compare-error hidden" role="alert" aria-live="assertive"></div>
@@ -75,6 +73,12 @@
   <footer class="app-footer">
     <p>Laboratorio #2 — ISW-521 Programación en Ambiente Web I — Universidad Técnica Nacional</p>
     <p>Datos de la Copa Mundial de la FIFA 2026 vía <a href="https://worldcup26.ir" target="_blank" rel="noopener noreferrer">worldcup26.ir</a></p>
+
+    <div class="session-panel">
+      <span class="session-status" id="session-status">Sesión: sin token</span>
+      <button id="simulate-expiry-btn" type="button">Simular expiración de sesión (401)</button>
+      <button id="demo-404-btn" type="button" class="demo-404-btn">Buscar equipo inexistente (404)</button>
+    </div>
   </footer>
 
   <!-- ===================== MODAL DE RE-AUTENTICACIÓN (401) ===================== -->
@@ -95,13 +99,6 @@
         <p id="login-error" class="login-error hidden"></p>
       </form>
     </div>
-  </div>
-
-  <!-- ===================== PANEL DE SESIÓN (para demostrar el 401 y 404 en la defensa) ===================== -->
-  <div class="session-panel">
-    <span class="session-status" id="session-status">Sesión: sin token</span>
-    <button id="simulate-expiry-btn" type="button">Simular expiración de sesión (401)</button>
-    <button id="demo-404-btn" type="button" class="demo-404-btn">Buscar equipo inexistente (404)</button>
   </div>
 
   <script type="module" src="js/main.js"></script>

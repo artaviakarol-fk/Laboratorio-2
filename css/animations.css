@@ -1,9 +1,3 @@
-/* ===================================================================
-   animations.css
-   Keyframes compartidos entre varios componentes, y el respeto a
-   prefers-reduced-motion (desactiva animaciones para quien lo pida
-   a nivel de sistema operativo).
-=================================================================== */
 
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(14px); }

@@ -1,18 +1,9 @@
-/* ===================================================================
-   search.js
-   Todo lo del buscador: debounce, búsqueda difusa (substring +
-   tolerancia a errores de tipeo), autocompletado contra la API,
-   render del dropdown, y la selección de hasta 2 equipos (chips).
-=================================================================== */
 
 import { CONFIG, state, els } from './config.js';
 import { apiFetch } from './api.js';
 import { openReauthModal } from './auth.js';
 import { loadComparison, resetCompareView } from './compare.js';
 
-/* ---------------------------------------------------------------
-   Debounce (implementado a mano, sin librerías)
---------------------------------------------------------------- */
 function debounce(fn, delay) {
   let timer = null;
   return (...args) => {
@@ -21,12 +12,6 @@ function debounce(fn, delay) {
   };
 }
 
-/* ---------------------------------------------------------------
-   Búsqueda difusa (substring + tolerancia a errores de tipeo)
---------------------------------------------------------------- */
-
-// Quita acentos y pasa a minúsculas, para que "colombia"/"Colombia"/
-// "Perú"/"peru" se comparen igual.
 function normalizeStr(str) {
   return String(str || '')
     .normalize('NFD')
@@ -35,8 +20,6 @@ function normalizeStr(str) {
     .trim();
 }
 
-// Distancia de Levenshtein clásica (número mínimo de inserciones,
-// borrados o sustituciones para convertir "a" en "b").
 function levenshtein(a, b) {
   const m = a.length, n = b.length;
   if (m === 0) return n;
@@ -56,11 +39,6 @@ function levenshtein(a, b) {
   return dp[m][n];
 }
 
-// La API solo trae nombres en inglés (name_en) y persa (name_fa).
-// Como quien busca escribe en español, mapeamos alias comunes para
-// que "corea", "alemania", "españa", etc. también encuentren el
-// equipo correspondiente. Ajustar si el name_en real difiere (por
-// ejemplo "Czechia" en vez de "Czech Republic").
 const SPANISH_ALIASES = {
   argentina: 'argentina', australia: 'australia', austria: 'austria',
   belgica: 'belgium', bosnia: 'bosnia and herzegovina', brasil: 'brazil',
@@ -83,17 +61,13 @@ const SPANISH_ALIASES = {
   argelia: 'algeria',
 };
 
-// Construye las cadenas contra las que se compara un equipo: su
-// nombre en inglés/persa siempre, y su alias en español aparte.
 function searchableStringsFor(team) {
   const primary = [normalizeStr(team.name_en), normalizeStr(team.name_fa)].filter(Boolean);
 
   const aliasStrings = [];
   const alias = SPANISH_ALIASES[normalizeStr(team.name_en).replace(/\s+/g, '')];
   if (alias) aliasStrings.push(normalizeStr(alias));
-  // También agrega el propio alias en español "hacia adelante": si
-  // el query coincide con una llave (ej. "corea"), la llave misma
-  // ya sirve como cadena buscable.
+
   Object.entries(SPANISH_ALIASES).forEach(([es, en]) => {
     if (normalizeStr(en) === normalizeStr(team.name_en)) aliasStrings.push(es);
   });
@@ -101,8 +75,6 @@ function searchableStringsFor(team) {
   return { primary, aliasStrings: aliasStrings.filter(Boolean) };
 }
 
-// Puntúa un equipo contra el texto buscado. Menor puntaje = mejor
-// coincidencia. Devuelve Infinity si no hay coincidencia razonable.
 function scoreTeam(query, team) {
   const nq = normalizeStr(query);
   let best = Infinity;
@@ -112,8 +84,7 @@ function scoreTeam(query, team) {
     if (!candidate) return;
     if (candidate.startsWith(nq)) { best = Math.min(best, 0); return; }
     if (candidate.includes(nq)) { best = Math.min(best, 1); return; }
-    // Tolerancia a errores de tipeo: solo aplica si la consulta ya
-    // tiene un tamaño razonable, para no generar ruido con 1-2 letras.
+
     if (nq.length >= 3) {
       const words = candidate.split(' ');
       words.forEach((word) => {
@@ -124,15 +95,7 @@ function scoreTeam(query, team) {
     }
   };
 
-  // El nombre real (en inglés/persa) siempre se compara.
   primary.forEach(checkCandidate);
-
-  // El alias en español SOLO se compara con consultas de 4+ letras.
-  // Con 1-3 letras, casi cualquier alias contiene esa combinación
-  // (ej. "ar" aparece dentro de "argelia", "marruecos", "arabia
-  // saudita"...) y termina mostrando equipos que en pantalla (donde
-  // se ve el nombre en inglés) no tienen ninguna relación visible
-  // con lo que la persona escribió.
   if (nq.length >= 4) {
     aliasStrings.forEach(checkCandidate);
   }
@@ -149,22 +112,8 @@ function filterTeamsLocally(query, teams) {
     .map((entry) => entry.team);
 }
 
-/* ---------------------------------------------------------------
-   Autocompletado
-   La ruta filtrada /get/team/?name= solo hace match EXACTO (lo
-   confirmamos en consola: buscar "argentin" devolvía {team: null}
-   aunque "Argentina" sí existe). Para lograr sugerencias parciales
-   ("c" -> Colombia, Croacia, Curazao...) y tolerar errores de tipeo,
-   traemos la lista completa (GET /get/teams, ya la sugería el propio
-   enunciado como alternativa: "obteniendo el listado y filtrando los
-   IDs internamente") y filtramos nosotros mismos. El debounce y el
-   AbortController siguen aplicando sobre esta petición real.
---------------------------------------------------------------- */
 async function performSearch(query) {
-  // Cancela cualquier búsqueda anterior que siga en vuelo.
-  // Esta es la pieza que resuelve la condición de carrera:
-  // aunque la respuesta de una tecla anterior llegue tarde, nunca
-  // se renderiza, porque su petición fue abortada.
+
   if (state.searchController) {
     state.searchController.abort();
   }
@@ -179,11 +128,6 @@ async function performSearch(query) {
     return;
   }
 
-  // Si el servidor no responde nada en 10s (como el 504 que ya vimos
-  // antes con esta API), abortamos nosotros mismos en vez de dejar la
-  // búsqueda esperando para siempre sin mostrar nada. Se marca el
-  // controller para distinguir este aborto "por timeout" de uno real
-  // por escribir una tecla más.
   const timeoutId = setTimeout(() => {
     controller.timedOut = true;
     controller.abort();
@@ -193,9 +137,6 @@ async function performSearch(query) {
     const data = await apiFetch(`/get/teams`, { signal: controller.signal });
     clearTimeout(timeoutId);
 
-    // Chequeo extra de secuencia: aunque AbortController ya evita
-    // que peticiones obsoletas se procesen, esta guarda protege
-    // contra el caso raro de que dos respuestas lleguen casi juntas.
     if (mySeq !== state.searchSeq) return;
 
     const allTeams = Array.isArray(data) ? data : (data.teams || []);
@@ -214,8 +155,7 @@ async function performSearch(query) {
         }
         return;
       }
-      // Cancelación intencional provocada por nosotros mismos.
-      // NUNCA se muestra al usuario como error.
+      
       console.log(`[AbortController] Búsqueda "${trimmed}" cancelada (superada por otra más reciente).`);
       return;
     }
@@ -231,7 +171,6 @@ async function performSearch(query) {
       openReauthModal(() => performSearch(query));
       return;
     }
-    // Error real de red o de servidor (distinto de un AbortError).
     console.error('Error real de red en autocompletado:', err);
     renderDropdown({ status: 'error' });
   }
@@ -243,8 +182,6 @@ els.input.addEventListener('input', (e) => {
   debouncedSearch(e.target.value);
 });
 
-// Flecha abajo desde el input: salta directo a la primera sugerencia
-// habilitada, como en cualquier buscador con teclado.
 els.input.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowDown') {
     const firstOption = els.dropdown.querySelector('li[tabindex="0"]');
@@ -257,9 +194,6 @@ els.input.addEventListener('keydown', (e) => {
   }
 });
 
-/* ---------------------------------------------------------------
-   Render dinámico del dropdown (sin marcado fijo en HTML)
---------------------------------------------------------------- */
 function renderDropdown({ status, teams = [], message }) {
   els.dropdown.innerHTML = ''; // se vacía en cada búsqueda nueva
 
@@ -303,9 +237,7 @@ function renderDropdown({ status, teams = [], message }) {
     if (disabled) {
       li.classList.add('disabled');
     } else {
-      // Accesible tanto por mouse como por teclado: Tab/flechas para
-      // moverse, Enter/Espacio para elegir, Escape para cerrar y
-      // volver al input. El patrón estándar de cualquier buscador.
+ 
       li.tabIndex = 0;
       li.addEventListener('click', () => selectTeam(team));
       li.addEventListener('keydown', (e) => {
@@ -341,16 +273,13 @@ document.addEventListener('click', (e) => {
   }
 });
 
-/* ---------------------------------------------------------------
-   Selección de equipos (máx. 2) + chips
---------------------------------------------------------------- */
+
 function selectTeam(team) {
   if (state.selected.length >= 2) return;
   state.selected.push(team);
   renderSelectedBar();
   els.input.value = '';
   els.dropdown.classList.add('hidden');
-  // Ya no se dispara sola: el usuario decide cuándo comparar con el botón.
 }
 
 function removeTeam(id) {
@@ -379,8 +308,6 @@ function renderSelectedBar() {
     els.selectedBar.appendChild(chip);
   });
 
-  // El botón solo aparece cuando ya hay al menos un equipo elegido,
-  // y solo se habilita cuando hay exactamente 2.
   els.compareBtn.classList.toggle('hidden', state.selected.length === 0);
   els.compareBtn.disabled = state.selected.length !== 2;
   els.compareBtn.textContent = state.selected.length === 2

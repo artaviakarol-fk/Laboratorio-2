@@ -1,9 +1,3 @@
-/* ===================================================================
-   accessibility.js
-   Controles de accesibilidad: tamaño de letra (A-/A+) y alto
-   contraste. Se aplican como clases en <html>, y se recuerdan en
-   localStorage para que persistan entre visitas.
-=================================================================== */
 
 import { els } from './config.js';
 
@@ -16,8 +10,7 @@ function applyFontScale(scale) {
   if (scale === 1) document.documentElement.classList.add('font-scale-1');
   if (scale === 2) document.documentElement.classList.add('font-scale-2');
   localStorage.setItem(A11Y_KEY.FONT, String(scale));
-  // Confirmación visible del cambio (no solo el tamaño real del texto,
-  // que a veces es sutil): un texto explícito de qué nivel quedó activo.
+ 
   if (els.fontSizeLabel) els.fontSizeLabel.textContent = `Tamaño: ${FONT_SCALE_LABELS[String(scale)]}`;
 }
 

@@ -1,18 +1,8 @@
-/* ===================================================================
-   compare.js
-   Todo lo de la comparación: la carga en paralelo con Promise.all
-   (detalle de cada equipo + su grupo + el calendario + estadios),
-   el cálculo de posición/último-próximo partido, y el render de las
-   dos columnas.
-=================================================================== */
 
 import { state, els } from './config.js';
 import { apiFetch } from './api.js';
 import { openReauthModal } from './auth.js';
 
-/* ---------------------------------------------------------------
-   Comparación en paralelo con Promise.all (sin .then/.catch)
---------------------------------------------------------------- */
 export async function loadComparison() {
   if (state.compareController) {
     state.compareController.abort();
@@ -20,10 +10,7 @@ export async function loadComparison() {
   const controller = new AbortController();
   state.compareController = controller;
 
-  // Si el servidor de la API no responde nada en 12s (como el 504 que
-  // vimos antes), abortamos nosotros mismos en vez de dejar "Cargando..."
-  // pegado para siempre. Marcamos el controller para distinguir este
-  // aborto "por timeout" de un aborto real por selección de otro equipo.
+
   const timeoutId = setTimeout(() => {
     controller.timedOut = true;
     controller.abort();
@@ -33,15 +20,6 @@ export async function loadComparison() {
   showCompareLoading();
 
   try {
-    // Todo se dispara al mismo tiempo con un solo Promise.all: detalle
-    // de cada equipo, la tabla de su grupo, y el calendario completo
-    // de partidos (para ubicar la fase/próximo partido).
-    //
-    // IMPORTANTE: la ruta /get/team/{id} (por ID) parece estar rota en
-    // el servidor real (nunca respondió, ni siquiera abriéndola directo
-    // en el navegador). La ruta /get/team/?name=... sí funciona (la
-    // usamos antes y respondió normal), así que pedimos el detalle por
-    // nombre en vez de por ID.
     const groupA = teamA.raw && teamA.raw.groups;
     const groupB = teamB.raw && teamB.raw.groups;
 
@@ -54,10 +32,6 @@ export async function loadComparison() {
       apiFetch(`/get/stadiums`, { signal: controller.signal }),
     ]);
 
-    // Algunas rutas de esta API envuelven el resultado en { team: {...} },
-    // otras lo devuelven directo, y a veces en un arreglo. Si por algún
-    // motivo viene vacío, caemos de vuelta a los datos que ya teníamos
-    // guardados de cuando el equipo apareció en el buscador.
     const unwrapTeam = (data, fallback) => {
       if (Array.isArray(data) && data.length) return data[0];
       if (data && data.team && data.team.id) return data.team;
@@ -88,10 +62,7 @@ export async function loadComparison() {
       return;
     }
     if (err.isAuthError) {
-      // Se muestra el error de que la comparación no se pudo completar
-      // (queda visible detrás del modal), y ADEMÁS se abre el modal
-      // pidiendo iniciar sesión de nuevo. Al reautenticarse, se
-      // reintenta esta misma comparación automáticamente.
+
       renderCompareError('Tu sesión expiró: no se pudo completar la comparación. Inicia sesión de nuevo para continuar.');
       openReauthModal(() => loadComparison());
       return;
@@ -101,10 +72,7 @@ export async function loadComparison() {
       return;
     }
     if (err instanceof TypeError) {
-      // fetch() rechaza con TypeError cuando la petición nunca llegó a
-      // tener una respuesta real: caída del servidor, timeout de la
-      // pasarela (504), o bloqueo de CORS. No es un 401/404 que la API
-      // haya devuelto explícitamente.
+  
       console.error('Fallo de red/CORS en la comparación (posible caída temporal de la API):', err);
       renderCompareError('No se pudo contactar con el servidor de la API en este momento. Puede ser una caída temporal. Intenta de nuevo en unos segundos.');
       return;
@@ -114,9 +82,6 @@ export async function loadComparison() {
   }
 }
 
-/* ---------------------------------------------------------------
-   Helpers: posición en el grupo y fase del torneo
---------------------------------------------------------------- */
 const STAGE_LABELS = {
   group: 'Fase de grupos',
   r32: 'Ronda de 32',
@@ -129,7 +94,7 @@ const STAGE_LABELS = {
 
 function computeStanding(teamId, groupData) {
   if (!groupData) return null;
-  // La API puede envolver la tabla como { group, teams } o devolverla directo.
+  
   const table = groupData.teams || (groupData.group && groupData.group.teams) || null;
   if (!Array.isArray(table)) return null;
 
@@ -159,12 +124,9 @@ function computeStanding(teamId, groupData) {
   };
 }
 
-// Resuelve el nombre del estadio probando varias formas posibles de
-// enlazar partido -> estadio, porque no confirmamos el nombre exacto
-// del campo en /get/games (stadium_id, venue_id, stadium_name directo...).
 function resolveStadiumName(game, stadiums) {
   if (!game) return null;
-  // Si el partido ya trae el nombre directo, se usa tal cual.
+
   if (game.stadium_name) return game.stadium_name;
   if (game.venue_name) return game.venue_name;
   if (typeof game.stadium === 'string') return game.stadium;
@@ -193,8 +155,6 @@ function buildMatchInfo(target, teamId, stadiums, isUpcoming) {
   };
 }
 
-// Devuelve el último partido jugado y el próximo pendiente (si existe),
-// además del total de goles anotados en los partidos ya jugados.
 function findTeamMatches(teamId, games, stadiums) {
   const teamGames = games
     .filter((g) => String(g.home_team_id) === String(teamId) || String(g.away_team_id) === String(teamId))
@@ -221,9 +181,6 @@ function findTeamMatches(teamId, games, stadiums) {
   };
 }
 
-/* ---------------------------------------------------------------
-   Render de las vistas de comparación
---------------------------------------------------------------- */
 export function resetCompareView() {
   els.compareColumns.classList.add('hidden');
   els.compareColumns.innerHTML = '';
@@ -273,9 +230,6 @@ function renderComparison(teamA, teamB) {
   els.compareColumns.classList.remove('hidden');
 }
 
-// Campos que el profesor pidió NO mostrar por ser poco relevantes
-// para comparar equipos (nombre en persa, código FIFA, iso2), además
-// de los campos internos que ya se muestran aparte (bandera, grupo).
 const HIDDEN_FIELDS = new Set([
   '_id', '__v', 'id', 'name_en', 'groups', 'flag',
   'name_fa', 'fifa_code', 'iso2',
@@ -285,10 +239,6 @@ const HIDDEN_FIELDS = new Set([
 function buildTeamColumn(team) {
   const col = document.createElement('div');
   col.className = 'team-column';
-  // Es contenido informativo, no un control, pero el profesor pidió
-  // que Tab recorra TODA la página — con esto, un usuario de teclado
-  // puede "aterrizar" en cada tarjeta, y un lector de pantalla anuncia
-  // el nombre del equipo al enfocarla.
   col.tabIndex = 0;
   col.setAttribute('role', 'group');
   col.setAttribute('aria-label', `Comparación de ${team.name_en || team.name || 'equipo'}`);
@@ -298,8 +248,6 @@ function buildTeamColumn(team) {
     img.src = team.flag;
     img.alt = `Bandera de ${team.name_en || ''}`;
     img.className = 'team-flag';
-    // Si la URL de bandera falla, la ocultamos en vez de dejar un
-    // ícono de imagen rota.
     img.addEventListener('error', () => img.remove());
     col.appendChild(img);
   }
@@ -312,7 +260,6 @@ function buildTeamColumn(team) {
     ? `🏃 ${team.__matchesPlayed} partido${team.__matchesPlayed === 1 ? '' : 's'} jugado${team.__matchesPlayed === 1 ? '' : 's'} en el mundial`
     : '';
 
-  // ---- Posición en el grupo + goles anotados + partidos jugados ----
   if (team.__standing) {
     const s = team.__standing;
     const standingBox = document.createElement('div');
@@ -339,7 +286,6 @@ function buildTeamColumn(team) {
     col.appendChild(standingBox);
   }
 
-  // ---- Último partido jugado (con estadio) ----
   if (team.__lastMatch) {
     const m = team.__lastMatch;
     const matchBox = document.createElement('div');
@@ -353,7 +299,6 @@ function buildTeamColumn(team) {
     col.appendChild(matchBox);
   }
 
-  // ---- Próximo partido (si todavía tiene uno pendiente) ----
   if (team.__nextMatch) {
     const m = team.__nextMatch;
     const matchBox = document.createElement('div');
@@ -368,9 +313,6 @@ function buildTeamColumn(team) {
   }
 
   const dl = document.createElement('dl');
-  // Se itera sobre las llaves reales que devuelva la API para no
-  // asumir una forma fija; cualquier campo nuevo que agreguen se
-  // muestra igual, salvo los que el profesor pidió ocultar.
   Object.entries(team).forEach(([key, value]) => {
     if (HIDDEN_FIELDS.has(key)) return;
     const dt = document.createElement('dt');
